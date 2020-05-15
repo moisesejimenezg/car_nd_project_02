@@ -24,7 +24,7 @@ perspective = Perspective(transformation)
 
 img = plt.imread('../test_images/straight_lines1.jpg')
 
-transformed = perspective.transform(img)
+transformed = perspective.Transform(img)
 
 f, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 9))
 f.tight_layout()
