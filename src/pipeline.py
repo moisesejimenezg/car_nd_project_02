@@ -4,16 +4,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from calibration import Calibration
-from gradient import Gradient
 from color import Color
+from gradient import Gradient
+from perspective import Perspective
 
 class Pipeline:
     def __init__(self, nx, ny, kernel_size = 3):
-        self.calibration_ = Calibration(nx, ny)
         self.img_ = {}
+        self.calibration_ = Calibration(nx, ny)
         self.gradient_ = Gradient(kernel_size)
-        self.gradient_images_ = []
         self.color_ = {}
+        self.perspective_ = {}
+        self.gradient_images_ = []
         self.filtered_ = {}
 
     def Calibrate(self, calibration_images_pattern):
@@ -57,3 +59,9 @@ class Pipeline:
         elif option is 'C':
             combined[(abs_threshold[0] == 1) | (self.filtered_ == 1)] = 1
         return combined
+
+    def InitPerspective(self, transformation):
+        self.perspective_ = Perspective(transformation)
+
+    def Transform(self, img):
+        return self.perspective_.Transform(img)
