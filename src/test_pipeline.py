@@ -38,6 +38,8 @@ transformation = Transformation(src_trp, dst_trp)
 pipeline.InitPerspective(transformation)
 transformed = pipeline.Transform(combinedA)
 
+left_fit, right_fit = pipeline.FitPolynomial(transformed, True)
+
 f, (ax1, ax2) = plt.subplots(2, 2, figsize=(24, 9))
 f.tight_layout()
 ax1[0].imshow(img)
