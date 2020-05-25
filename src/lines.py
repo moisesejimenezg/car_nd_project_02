@@ -11,6 +11,13 @@ class Window:
         self.y_high_ = y_high
 
 
+class PolynomialFit:
+    def __init__(self, polynomial, rw_polynomial, polynomial_fit):
+        self.polynomial_ = polynomial
+        self.rw_polynomial_ = rw_polynomial
+        self.polynomial_fit_ = polynomial_fit
+
+
 class Lines:
     def __init__(self, windows=9, margin=100, minimum_hits=50):
         self.windows_ = windows
@@ -51,11 +58,12 @@ class Lines:
         rw_polynomial = np.polyfit(y * ym_per_pix, x * xm_per_pix, 2)
         polynomial = np.polyfit(y, x, 2)
         try:
-            fit = polynomial[0] * ploty ** 2 + polynomial[1] * ploty + polynomial[2]
+            fit = polynomial[0] * ploty ** 2 + \
+                polynomial[1] * ploty + polynomial[2]
         except TypeError:
             print('Could not fit polynomial')
             fit = 1 * ploty ** 2 + 1 * ploty
-        return polynomial, rw_polynomial, fit
+        return PolynomialFit(polynomial, rw_polynomial, fit)
 
     def __Visualize__(self, out_img, lefty, leftx, righty, rightx, left_fit, right_fit, ploty):
         out_img[lefty, leftx] = [255, 0, 0]
@@ -65,7 +73,7 @@ class Lines:
         plt.imshow(out_img)
         plt.show()
 
-    def Process(self, img, visualize=False, xm_per_pix = (3.7/900), ym_per_pix = (30/720)):
+    def Process(self, img, visualize=False, xm_per_pix=(3.7/900), ym_per_pix=(30/720)):
         histogram = np.sum(img[img.shape[0]//2:, :], axis=0)
         midpoint = np.int(histogram.shape[0]//2)
         leftx_base = np.argmax(histogram[:midpoint])
@@ -94,14 +102,17 @@ class Lines:
         righty = nonzeroy[right_lane_ids]
 
         ploty = np.linspace(0, img.shape[0] - 1, img.shape[0])
-        left_polynomial, rw_left_polynomial, left_fit = self.__FitPolynomial__(leftx, lefty, ploty, xm_per_pix, ym_per_pix)
-        right_polynomial, rw_right_polynomial, right_fit = self.__FitPolynomial__(rightx, righty, ploty, xm_per_pix, ym_per_pix)
+        left_fit = self.__FitPolynomial__(
+            leftx, lefty, ploty, xm_per_pix, ym_per_pix)
+        right_fit = self.__FitPolynomial__(
+            rightx, righty, ploty, xm_per_pix, ym_per_pix)
         if visualize:
             self.__Visualize__(out_img, lefty, leftx, righty,
-                               rightx, left_fit, right_fit, ploty)
-        return left_polynomial, rw_left_polynomial, left_fit, right_polynomial, rw_right_polynomial, right_fit
+                               rightx, left_fit.polynomial_fit_, right_fit.polynomial_fit_, ploty)
+        return left_fit, right_fit
 
-    def CalculateCurvature(self, polynomial_fit, y, ym_per_pix = (30/720)):
-        numerator = (1 + (2 * polynomial_fit[0] * y * ym_per_pix + polynomial_fit[1]) ** 2) ** (3/2)
+    def CalculateCurvature(self, polynomial_fit, y, ym_per_pix=(30/720)):
+        numerator = (
+            1 + (2 * polynomial_fit[0] * y * ym_per_pix + polynomial_fit[1]) ** 2) ** (3/2)
         denominator = abs(2 * polynomial_fit[0])
         return numerator / denominator

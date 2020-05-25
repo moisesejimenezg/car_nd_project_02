@@ -74,3 +74,6 @@ class Pipeline:
 
     def FitPolynomial(self, img, visualize=False):
         return self.lines_.Process(img, visualize)
+
+    def CalculateCurvature(self, polynomial_fit, y, ym_per_pix=(30/720)):
+        return self.lines_.CalculateCurvature(polynomial_fit, y, ym_per_pix)

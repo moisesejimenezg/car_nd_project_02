@@ -8,10 +8,10 @@ from pipeline import Pipeline
 
 pipeline = Pipeline(9, 6, 15)
 pipeline.Calibrate('../camera_cal/calibration*.jpg')
-img = plt.imread('../test_images/straight_lines1.jpg')
+img = plt.imread('../test_images/test5.jpg')
 pipeline.Undistort(img)
 pipeline.CalculateGradient()
-pipeline.FilterGradients((20,100), (30, 100), (0.7, 1.3))
+pipeline.FilterGradients((20, 100), (30, 100), (0.7, 1.3))
 pipeline.InitColor()
 pipeline.FilterColor((170, 255))
 
@@ -39,6 +39,13 @@ pipeline.InitPerspective(transformation)
 transformed = pipeline.Transform(combinedA)
 
 left_fit, right_fit = pipeline.FitPolynomial(transformed, True)
+
+y_eval = img.shape[0]
+left_curvature = pipeline.CalculateCurvature(left_fit.rw_polynomial_, y_eval)
+right_curvature = pipeline.CalculateCurvature(right_fit.rw_polynomial_, y_eval)
+
+print('Left curvature: ' + str(left_curvature))
+print('Right curvature: ' + str(right_curvature))
 
 f, (ax1, ax2) = plt.subplots(2, 2, figsize=(24, 9))
 f.tight_layout()
