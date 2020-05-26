@@ -79,7 +79,7 @@ class Lines:
         pts_left = np.array([np.transpose(np.vstack([left_fit.polynomial_fit_, left_fit.ploty_]))])
         pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit.polynomial_fit_, right_fit.ploty_])))])
         pts = np.hstack((pts_left, pts_right))
-        out_img = np.copy(img)
+        out_img = np.zeros_like(img).astype(np.uint8)
         cv2.fillPoly(out_img, np.int_([pts]), (0,255, 0))
         return out_img
 
