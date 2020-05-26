@@ -77,3 +77,8 @@ class Pipeline:
 
     def CalculateCurvature(self, polynomial_fit, y, ym_per_pix=(30/720)):
         return self.lines_.CalculateCurvature(polynomial_fit, y, ym_per_pix)
+
+    def PlotLaneOnImage(self, img, left_fit, right_fit):
+        lane_img = self.lines_.PlotPoly(img, left_fit, right_fit)
+        unwarped_lane = self.perspective_.InverseTransform(lane_img)
+        return cv2.addWeighted(self.img_, 1, unwarped_lane, 0.3, 0)

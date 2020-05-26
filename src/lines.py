@@ -12,10 +12,11 @@ class Window:
 
 
 class PolynomialFit:
-    def __init__(self, polynomial, rw_polynomial, polynomial_fit):
+    def __init__(self, polynomial, rw_polynomial, polynomial_fit, ploty):
         self.polynomial_ = polynomial
         self.rw_polynomial_ = rw_polynomial
         self.polynomial_fit_ = polynomial_fit
+        self.ploty_ = ploty
 
 
 class Lines:
@@ -63,15 +64,24 @@ class Lines:
         except TypeError:
             print('Could not fit polynomial')
             fit = 1 * ploty ** 2 + 1 * ploty
-        return PolynomialFit(polynomial, rw_polynomial, fit)
+        return PolynomialFit(polynomial, rw_polynomial, fit, ploty)
 
     def __Visualize__(self, out_img, lefty, leftx, righty, rightx, left_fit, right_fit, ploty):
         out_img[lefty, leftx] = [255, 0, 0]
         out_img[righty, rightx] = [0, 0, 255]
+
         plt.plot(left_fit, ploty, color='yellow')
         plt.plot(right_fit, ploty, color='yellow')
         plt.imshow(out_img)
         plt.show()
+
+    def PlotPoly(self, img, left_fit, right_fit):
+        pts_left = np.array([np.transpose(np.vstack([left_fit.polynomial_fit_, left_fit.ploty_]))])
+        pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fit.polynomial_fit_, right_fit.ploty_])))])
+        pts = np.hstack((pts_left, pts_right))
+        out_img = np.copy(img)
+        cv2.fillPoly(out_img, np.int_([pts]), (0,255, 0))
+        return out_img
 
     def Process(self, img, visualize=False, xm_per_pix=(3.7/900), ym_per_pix=(30/720)):
         histogram = np.sum(img[img.shape[0]//2:, :], axis=0)
