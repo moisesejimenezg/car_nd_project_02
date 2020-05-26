@@ -5,9 +5,12 @@ import numpy as np
 
 from calibration import Calibration
 from color import Color
+from geometry import Point
+from geometry import Transformation
+from geometry import Trapezoid
 from gradient import Gradient
-from perspective import Perspective
 from lines import Lines
+from perspective import Perspective
 
 
 class Pipeline:
@@ -82,3 +85,42 @@ class Pipeline:
         lane_img = self.lines_.PlotPoly(img, left_fit, right_fit)
         unwarped_lane = self.perspective_.InverseTransform(lane_img)
         return cv2.addWeighted(self.img_, 1, unwarped_lane, 0.3, 0)
+
+    def Process(self, img):
+        plt.imshow(img)
+        plt.show()
+        self.Undistort(img)
+        self.CalculateGradient()
+        self.FilterGradients((20, 100), (30, 100), (0.7, 1.3))
+        self.InitColor()
+        self.FilterColor((170, 255))
+        combinedA = self.JoinOption('A')
+
+        src_p0 = Point(190, 720)
+        src_p1 = Point(550, 480)
+        src_p2 = Point(730, 480)
+        src_p3 = Point(1115, 720)
+
+        src_trp = Trapezoid(src_p0, src_p1, src_p2, src_p3)
+
+        dst_p0 = Point(250, 720)
+        dst_p1 = Point(250, 460)
+        dst_p2 = Point(980, 460)
+        dst_p3 = Point(980, 720)
+
+        dst_trp = Trapezoid(dst_p0, dst_p1, dst_p2, dst_p3)
+
+        transformation = Transformation(src_trp, dst_trp)
+
+        self.InitPerspective(transformation)
+        transformed = self.Transform(combinedA)
+
+        left_fit, right_fit = self.FitPolynomial(transformed, False)
+
+        result = self.PlotLaneOnImage(self.img_, left_fit, right_fit)
+
+        y_eval = img.shape[0]
+        left_curvature = self.CalculateCurvature(left_fit.rw_polynomial_, y_eval)
+        right_curvature = self.CalculateCurvature(right_fit.rw_polynomial_, y_eval)
+
+        return result, left_curvature, right_curvature
