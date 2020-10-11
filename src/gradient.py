@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 
+
 class Gradient:
-    def __init__(self, kernel_size = 3):
+    def __init__(self, kernel_size=3):
         self.kernel_size_ = kernel_size
         self.x_ = []
         self.y_ = []
@@ -12,7 +13,7 @@ class Gradient:
         self.x_ = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=self.kernel_size_)
         self.y_ = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=self.kernel_size_)
 
-    def Scale(self, img, peak = 255):
+    def Scale(self, img, peak=255):
         return np.uint8(peak * img / np.max(img))
 
     def AbsoluteThreshold(self, thresh=(0, 255)):
@@ -30,7 +31,7 @@ class Gradient:
         output[(scaled_mag > thresh[0]) & (scaled_mag < thresh[1])] = 1
         return output
 
-    def DirectionThreshold(self, thresh=(0, np.pi/2)):
+    def DirectionThreshold(self, thresh=(0, np.pi / 2)):
         absolute = (np.absolute(self.x_), np.absolute(self.y_))
         atan_abs_sob_gra = np.arctan2(absolute[1], absolute[0])
         output = np.zeros_like(self.x_)

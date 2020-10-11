@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
 
+
 class Color:
     def __init__(self, img):
-        self.s_ = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)[:,:,2]
+        self.s_ = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)[:, :, 2]
 
     def Filter(self, threshold=(0, 255)):
         output = np.zeros_like(self.s_)

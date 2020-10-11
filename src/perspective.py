@@ -1,10 +1,13 @@
 import cv2
 
+
 class Perspective:
     def __init__(self, transformation):
         self.transformation_ = transformation
         self.m_ = cv2.getPerspectiveTransform(self.transformation_.GetSource(), self.transformation_.GetDestination())
-        self.m_inv_ = cv2.getPerspectiveTransform(self.transformation_.GetDestination(), self.transformation_.GetSource())
+        self.m_inv_ = cv2.getPerspectiveTransform(
+            self.transformation_.GetDestination(), self.transformation_.GetSource()
+        )
 
     def Transform(self, img):
         img_size = (img.shape[1], img.shape[0])

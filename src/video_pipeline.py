@@ -4,7 +4,7 @@ from pipeline import Pipeline
 
 
 class VideoPipeline:
-    def __init__(self, nx, ny, kernel_size = 3):
+    def __init__(self, nx, ny, kernel_size=3):
         self.pipeline_ = Pipeline(nx, ny, kernel_size)
 
     def Prepare(self):
@@ -17,4 +17,3 @@ class VideoPipeline:
         clip = VideoFileClip(input_path)
         processed_clip = clip.fl_image(self.pipeline_.Process)
         processed_clip.write_videofile(output_path, audio=False)
-

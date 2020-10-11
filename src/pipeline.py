@@ -23,9 +23,8 @@ class Pipeline:
         self.perspective_ = {}
         self.gradient_images_ = []
         self.filtered_ = {}
-        self.calibration_path_ = '../camera_cal/calibration*.jpg'
-        self.curvatures_ = {'left': [], 'right': []}
-
+        self.calibration_path_ = "../camera_cal/calibration*.jpg"
+        self.curvatures_ = {"left": [], "right": []}
 
     def Calibrate(self, calibration_images_pattern):
         files = glob.glob(calibration_images_pattern)
@@ -34,7 +33,6 @@ class Pipeline:
             gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
             self.calibration_.Update(gray)
         self.calibration_.Calibrate()
-
 
     def InitPerspective(self):
 
@@ -55,74 +53,67 @@ class Pipeline:
         transformation = Transformation(src_trp, dst_trp)
         self.perspective_ = Perspective(transformation)
 
-
     def Undistort(self, img):
         self.img_ = self.calibration_.Undistort(img)
-
 
     def CalculateGradient(self):
         self.gradient_.CalculateGradient(self.img_)
 
-
-    def FilterGradients(self, absolute_thresh=(0, 255), magnitude_thresh=(0, 255), direction_thresh=(0, np.pi/2)):
+    def FilterGradients(
+        self,
+        absolute_thresh=(0, 255),
+        magnitude_thresh=(0, 255),
+        direction_thresh=(0, np.pi / 2),
+    ):
         absolute = self.gradient_.AbsoluteThreshold(absolute_thresh)
         self.gradient_images_.append(absolute[0])
         self.gradient_images_.append(absolute[1])
-        self.gradient_images_.append(
-            self.gradient_.MagnitudeThreshold(magnitude_thresh))
-        self.gradient_images_.append(
-            self.gradient_.DirectionThreshold(direction_thresh))
-
+        self.gradient_images_.append(self.gradient_.MagnitudeThreshold(magnitude_thresh))
+        self.gradient_images_.append(self.gradient_.DirectionThreshold(direction_thresh))
 
     def InitColor(self):
         self.color_ = Color(self.img_)
 
-
     def FilterColor(self, threshold=(0, 255)):
         self.filtered_ = self.color_.Filter(threshold)
 
-
-    def JoinOption(self, option='A'):
+    def JoinOption(self, option="A"):
         combined = np.zeros_like(self.gradient_images_[0])
         abs_threshold = []
         abs_threshold.append(self.gradient_images_[0])
         abs_threshold.append(self.gradient_images_[1])
         mag_threshold = self.gradient_images_[2]
         dir_threshold = self.gradient_images_[3]
-        if option is 'A':
-            combined[(((abs_threshold[0] == 1) & (abs_threshold[1] == 1)) | (
-                (mag_threshold == 1) & (dir_threshold == 1))) | (self.filtered_ == 1)] = 1
-        elif option is 'B':
+        if option is "A":
+            combined[
+                (((abs_threshold[0] == 1) & (abs_threshold[1] == 1)) | ((mag_threshold == 1) & (dir_threshold == 1)))
+                | (self.filtered_ == 1)
+            ] = 1
+        elif option is "B":
             combined[(abs_threshold[0] == 1) | (self.filtered_ == 1)] = 1
-        elif option is 'C':
+        elif option is "C":
             combined[(abs_threshold[0] == 1) | (self.filtered_ == 1)] = 1
         return combined
-
 
     def Transform(self, img):
         return self.perspective_.Transform(img)
 
-
     def FitPolynomial(self, img, visualize=False):
         return self.lines_.Process(img, visualize)
 
-
-    def CalculateCurvature(self, polynomial_fit, y, ym_per_pix=(30/720)):
+    def CalculateCurvature(self, polynomial_fit, y, ym_per_pix=(30 / 720)):
         return self.lines_.CalculateCurvature(polynomial_fit, y, ym_per_pix)
-
 
     def PlotLaneOnImage(self, img, left_fit, right_fit):
         lane_img = self.lines_.PlotPoly(img, left_fit, right_fit)
         unwarped_lane = self.perspective_.InverseTransform(lane_img)
         return cv2.addWeighted(self.img_, 1, unwarped_lane, 0.3, 0)
 
-
     def Prepare(self):
         self.Calibrate(self.calibration_path_)
         self.InitPerspective()
 
-
-    def Process(self, img, display = False):
+    def Process(self, img, display=False):
         self.gradient_images_ = []
         if display:
             plt.imshow(img)
@@ -141,8 +132,8 @@ class Pipeline:
         result = self.PlotLaneOnImage(self.img_, left_fit, right_fit)
 
         y_eval = img.shape[0]
-        self.curvatures_['left'].append(self.CalculateCurvature(left_fit.rw_polynomial_, y_eval))
-        self.curvatures_['right'].append(self.CalculateCurvature(right_fit.rw_polynomial_, y_eval))
+        self.curvatures_["left"].append(self.CalculateCurvature(left_fit.rw_polynomial_, y_eval))
+        self.curvatures_["right"].append(self.CalculateCurvature(right_fit.rw_polynomial_, y_eval))
 
         return result
 
