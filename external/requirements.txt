@@ -1,0 +1,5 @@
+matplotlib
+imageio-ffmpeg
+moviepy
+numpy
+opencv-contrib-python-headless
