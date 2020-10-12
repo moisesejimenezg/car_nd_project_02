@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 
-from geometry import Point
-from geometry import Transformation
-from geometry import Trapezoid
-from perspective import Perspective
+from advanced_lane_finder.core.geometry import Point
+from advanced_lane_finder.core.geometry import Transformation
+from advanced_lane_finder.core.geometry import Trapezoid
+from advanced_lane_finder.core.perspective import Perspective
 
 src_p0 = Point(200, 720)
 src_p1 = Point(570, 460)
@@ -22,7 +22,7 @@ dst_trp = Trapezoid(dst_p0, dst_p1, dst_p2, dst_p3)
 transformation = Transformation(src_trp, dst_trp)
 perspective = Perspective(transformation)
 
-img = plt.imread("../test_images/straight_lines1.jpg")
+img = plt.imread("advanced_lane_finder/data/test_images/straight_lines1.jpg")
 
 transformed = perspective.Transform(img)
 

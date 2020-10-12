@@ -20,6 +20,7 @@ py_library(
         "core/lines.py",
         "core/perspective.py",
         "core/pipeline.py",
+        "core/prev_poly.py",
         "core/video_pipeline.py",
     ],
     deps = [
@@ -27,6 +28,61 @@ py_library(
         requirement("moviepy"),
         requirement("numpy"),
         requirement("opencv-contrib-python-headless"),
+    ],
+)
+
+py_binary(
+    name = "test_calibration",
+    srcs = ["prototypes/test_calibration.py"],
+    deps = [
+        ":advanced_lane_finder",
+    ],
+    data = [
+        ":data",
+    ],
+)
+
+py_binary(
+    name = "test_color",
+    srcs = ["prototypes/test_color.py"],
+    deps = [
+        ":advanced_lane_finder",
+    ],
+    data = [
+        ":data",
+    ],
+)
+
+py_binary(
+    name = "test_gradient",
+    srcs = ["prototypes/test_gradient.py"],
+    deps = [
+        ":advanced_lane_finder",
+    ],
+    data = [
+        ":data",
+    ],
+)
+
+py_binary(
+    name = "test_lines",
+    srcs = ["prototypes/test_lines.py"],
+    deps = [
+        ":advanced_lane_finder",
+    ],
+    data = [
+        ":data",
+    ],
+)
+
+py_binary(
+    name = "test_perspective",
+    srcs = ["prototypes/test_perspective.py"],
+    deps = [
+        ":advanced_lane_finder",
+    ],
+    data = [
+        ":data",
     ],
 )
 

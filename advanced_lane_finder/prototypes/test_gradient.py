@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from gradient import Gradient
-from color import Color
+from advanced_lane_finder.core.gradient import Gradient
+from advanced_lane_finder.core.color import Color
 
 gradient = Gradient(3)
-img = plt.imread("../test_images/test1.jpg")
+img = plt.imread("advanced_lane_finder/data/test_images/test1.jpg")
 color = Color(img)
 gradient.CalculateGradient(img)
 
@@ -15,7 +15,7 @@ mag_threshold = gradient.MagnitudeThreshold((30, 100))
 
 dir_threshold = gradient.DirectionThreshold((0.7, 1.3))
 
-filtered = color.filter((170, 255))
+filtered = color.Filter((170, 255))
 
 combined = np.zeros_like(dir_threshold)
 combined[

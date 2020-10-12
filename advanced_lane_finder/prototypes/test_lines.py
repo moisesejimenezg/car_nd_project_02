@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 
-from lines import Lines
+from advanced_lane_finder.core.lines import Lines
 
 lines = Lines()
 
-img = plt.imread("../examples/warped-example.jpg")
+img = plt.imread("advanced_lane_finder/data/examples/warped-example.jpg")
 left_fit, right_fit = lines.Process(img, True)
 
 y_eval = img.shape[0]
