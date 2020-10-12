@@ -12,6 +12,7 @@ from advanced_lane_finder.core.geometry import Trapezoid
 from advanced_lane_finder.core.gradient import Gradient
 from advanced_lane_finder.core.lines import Lines
 from advanced_lane_finder.core.perspective import Perspective
+from advanced_lane_finder.core.prev_poly import search_around_poly
 
 
 class Pipeline:
@@ -26,6 +27,7 @@ class Pipeline:
         self.filtered_ = {}
         self.calibration_path_ = "advanced_lane_finder/data/camera_cal/calibration*.jpg"
         self.curvatures_ = {"left": [], "right": []}
+        self.previous_polinomial_ = {"left": [], "right": [], "set": False}
 
     def Calibrate(self, calibration_images_pattern):
         files = glob.glob(calibration_images_pattern)
@@ -37,7 +39,7 @@ class Pipeline:
 
     def InitPerspective(self):
 
-        src_p0 = Point(190, 720)
+        src_p0 = Point(165, 720)
         src_p1 = Point(550, 480)
         src_p2 = Point(730, 480)
         src_p3 = Point(1115, 720)
@@ -87,7 +89,7 @@ class Pipeline:
         dir_threshold = self.gradient_images_[3]
         if option is "A":
             combined[
-                (((abs_threshold[0] == 1) & (abs_threshold[1] == 1)) | ((mag_threshold == 1) & (dir_threshold == 1)))
+                ((abs_threshold[0] == 1) | ((mag_threshold == 1) & (dir_threshold == 1)))
                 | (self.filtered_ == 1)
             ] = 1
         elif option is "B":
@@ -123,12 +125,28 @@ class Pipeline:
         self.CalculateGradient()
         self.FilterGradients((20, 100), (30, 100), (0.7, 1.3))
         self.InitColor()
-        self.FilterColor((170, 255))
+        self.FilterColor((100, 255))
         combinedA = self.JoinOption()
 
         transformed = self.Transform(combinedA)
 
-        left_fit, right_fit = self.FitPolynomial(transformed, False)
+        if not self.previous_polinomial_["set"]:
+            left_fit, right_fit = self.FitPolynomial(transformed, False)
+            self.previous_polinomial_["left"] = left_fit
+            self.previous_polinomial_["right"] = right_fit
+            self.previous_polinomial_["set"] = True
+        else:
+            xm_per_pix = 3.7 / 900
+            ym_per_pix = 30 / 720
+            left_fit, right_fit = search_around_poly(
+                transformed,
+                self.previous_polinomial_["left"].polynomial_,
+                self.previous_polinomial_["right"].polynomial_,
+                xm_per_pix,
+                ym_per_pix,
+            )
+            self.previous_polinomial_["left"] = left_fit
+            self.previous_polinomial_["right"] = right_fit
 
         result = self.PlotLaneOnImage(self.img_, left_fit, right_fit)
 
