@@ -11,7 +11,10 @@ class VideoPipeline:
         self.pipeline_.Prepare()
 
     def GetCurvatures(self):
-        self.pipeline_.GetCurvatures()
+        return self.pipeline_.GetCurvatures()
+
+    def GetOffsets(self):
+        return self.pipeline_.GetOffsets()
 
     def Process(self, input_path, output_path):
         clip = VideoFileClip(input_path)

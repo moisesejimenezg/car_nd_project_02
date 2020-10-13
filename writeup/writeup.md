@@ -245,6 +245,8 @@ Note: bazel run //advanced_lane_finder:test_pipeline
 
 ### Pipeline (video)
 
+It can be generated using `bazel run //advanced_lane_finder:test_video_pipeline`.
+
 Here's a [link to my video result](https://github.com/moisesejimenezg/car_nd_project_02/blob/master/advanced_lane_finder/data/output_video/processed_project_video.mp4)
 
 ---
