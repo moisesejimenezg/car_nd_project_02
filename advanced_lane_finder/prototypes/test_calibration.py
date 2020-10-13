@@ -18,7 +18,14 @@ for image_name in files:
 
 calibration.Calibrate()
 image_name = "advanced_lane_finder/data/camera_cal/calibration1.jpg"
+
 img = cv2.imread(image_name)
 undistorted = calibration.Undistort(img)
-plt.imshow(undistorted)
+
+f, (ax1, ax2) = plt.subplots(1, 2)
+f.tight_layout()
+ax1.imshow(img)
+ax1.set_title('Raw image')
+ax2.imshow(undistorted)
+ax2.set_title('Undistorted Image')
 plt.show()

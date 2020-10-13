@@ -1,14 +1,14 @@
 import cv2
 import matplotlib.pyplot as plt
 
-from geometry import Point
-from geometry import Transformation
-from geometry import Trapezoid
-from pipeline import Pipeline
+from advanced_lane_finder.core.geometry import Point
+from advanced_lane_finder.core.geometry import Transformation
+from advanced_lane_finder.core.geometry import Trapezoid
+from advanced_lane_finder.core.pipeline import Pipeline
 
 pipeline = Pipeline(9, 6, 15)
 pipeline.Prepare()
-img = plt.imread("../test_images/test3.jpg")
+img = plt.imread("advanced_lane_finder/data/test_images/test3.jpg")
 pipeline.Undistort(img)
 pipeline.CalculateGradient()
 pipeline.FilterGradients((20, 100), (30, 100), (0.7, 1.3))
@@ -26,21 +26,18 @@ left_fit, right_fit = pipeline.FitPolynomial(transformed, False)
 result = pipeline.PlotLaneOnImage(pipeline.img_, left_fit, right_fit)
 
 y_eval = img.shape[0]
-pipeline.CalculateCurvature(left_fit.rw_polynomial_, y_eval)
-pipeline.CalculateCurvature(right_fit.rw_polynomial_, y_eval)
+left_c = pipeline.CalculateCurvature(left_fit.rw_polynomial_, y_eval)
+right_c = pipeline.CalculateCurvature(right_fit.rw_polynomial_, y_eval)
+offset = pipeline.CalculateOffsetFromCenter(left_fit, right_fit)
 
-print("Left curvature: " + str(pipeline.GetCurvatures()["left"]))
-print("Right curvature: " + str(pipeline.GetCurvatures()["right"]))
+print("Left curvature: " + str(left_c))
+print("Right curvature: " + str(right_c))
+print("Offset: " + str(offset))
 
-f, (ax1, ax2) = plt.subplots(2, 2, figsize=(24, 9))
+f, (ax1, ax2) = plt.subplots(1, 2)
 f.tight_layout()
-ax1[0].imshow(pipeline.img_)
-ax1[0].set_title("Undistorted", fontsize=10)
-ax1[1].imshow(combinedA, cmap="gray")
-ax1[1].set_title("Combined", fontsize=10)
-ax2[0].imshow(transformed, cmap="gray")
-ax2[0].set_title("Transformed", fontsize=10)
-ax2[1].imshow(result)
-ax2[1].set_title("Fitted", fontsize=10)
-plt.subplots_adjust(left=0.0, right=1, top=0.9, bottom=0.0)
+ax1.imshow(pipeline.img_)
+ax1.set_title("Undistorted", fontsize=10)
+ax2.imshow(result)
+ax2.set_title("Fitted", fontsize=10)
 plt.show()

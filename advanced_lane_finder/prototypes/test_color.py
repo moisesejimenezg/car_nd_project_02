@@ -8,5 +8,10 @@ color = Color(img)
 
 filtered = color.Filter((170, 255))
 
-plt.imshow(filtered, cmap="gray")
+f, (ax1, ax2) = plt.subplots(1, 2)
+f.tight_layout()
+ax1.imshow(img)
+ax1.set_title('Raw image')
+ax2.imshow(filtered)
+ax2.set_title('Color Filtered Image')
 plt.show()
