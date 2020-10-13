@@ -12,7 +12,6 @@ from advanced_lane_finder.core.geometry import Trapezoid
 from advanced_lane_finder.core.gradient import Gradient
 from advanced_lane_finder.core.lines import Lines
 from advanced_lane_finder.core.perspective import Perspective
-from advanced_lane_finder.core.prev_poly import search_around_poly
 
 
 class Pipeline:
@@ -27,7 +26,14 @@ class Pipeline:
         self.filtered_ = {}
         self.calibration_path_ = "advanced_lane_finder/data/camera_cal/calibration*.jpg"
         self.curvatures_ = {"left": [], "right": []}
+        self.offsets_ = []
         self.previous_polinomial_ = {"left": [], "right": [], "set": False}
+
+    def GetCurvatures(self):
+        return self.curvatures_
+
+    def GetOffsets(self):
+        return self.offsets_
 
     def Calibrate(self, calibration_images_pattern):
         files = glob.glob(calibration_images_pattern)
@@ -102,10 +108,22 @@ class Pipeline:
         return self.perspective_.Transform(img)
 
     def FitPolynomial(self, img, visualize=False):
-        return self.lines_.Process(img, visualize)
+        if not self.previous_polinomial_['set']:
+            left_fit, right_fit = self.lines_.Process(img, visualize)
+            self.previous_polinomial_["left"] = left_fit
+            self.previous_polinomial_["right"] = right_fit
+            self.previous_polinomial_["set"] = True
+        else:
+            left_fit, right_fit =  self.lines_.LookBack(img, self.previous_polinomial_['left'].polynomial_, self.previous_polinomial_['right'].polynomial_)
+            self.previous_polinomial_["left"] = left_fit
+            self.previous_polinomial_["right"] = right_fit
+        return left_fit, right_fit
 
     def CalculateCurvature(self, polynomial_fit, y, ym_per_pix=(30 / 720)):
         return self.lines_.CalculateCurvature(polynomial_fit, y, ym_per_pix)
+
+    def CalculateOffsetFromCenter(self, left_fit, right_fit):
+        return self.lines_.CalculateOffsetFromCenter(left_fit, right_fit)
 
     def PlotLaneOnImage(self, img, left_fit, right_fit):
         lane_img = self.lines_.PlotPoly(img, left_fit, right_fit)
@@ -130,31 +148,13 @@ class Pipeline:
 
         transformed = self.Transform(combinedA)
 
-        if not self.previous_polinomial_["set"]:
-            left_fit, right_fit = self.FitPolynomial(transformed, False)
-            self.previous_polinomial_["left"] = left_fit
-            self.previous_polinomial_["right"] = right_fit
-            self.previous_polinomial_["set"] = True
-        else:
-            xm_per_pix = 3.7 / 900
-            ym_per_pix = 30 / 720
-            left_fit, right_fit = search_around_poly(
-                transformed,
-                self.previous_polinomial_["left"].polynomial_,
-                self.previous_polinomial_["right"].polynomial_,
-                xm_per_pix,
-                ym_per_pix,
-            )
-            self.previous_polinomial_["left"] = left_fit
-            self.previous_polinomial_["right"] = right_fit
+        left_fit, right_fit = self.FitPolynomial(transformed, False)
 
         result = self.PlotLaneOnImage(self.img_, left_fit, right_fit)
 
         y_eval = img.shape[0]
         self.curvatures_["left"].append(self.CalculateCurvature(left_fit.rw_polynomial_, y_eval))
         self.curvatures_["right"].append(self.CalculateCurvature(right_fit.rw_polynomial_, y_eval))
+        self.offsets_.append(self.CalculateOffsetFromCenter(left_fit, right_fit))
 
         return result
-
-    def GetCurvatures(self):
-        return self.curvatures_

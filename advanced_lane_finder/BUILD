@@ -20,7 +20,6 @@ py_library(
         "core/lines.py",
         "core/perspective.py",
         "core/pipeline.py",
-        "core/prev_poly.py",
         "core/video_pipeline.py",
     ],
     deps = [

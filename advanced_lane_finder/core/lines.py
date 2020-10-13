@@ -154,7 +154,35 @@ class Lines:
             )
         return left_fit, right_fit
 
+    def LookBack(self, binary_warped, left_fit, right_fit, margin=100, xm_per_pix=(3.7 / 900), ym_per_pix=(30 / 720)):
+        nonzero = binary_warped.nonzero()
+        nonzeroy = np.array(nonzero[0])
+        nonzerox = np.array(nonzero[1])
+
+        left_lane_inds = (nonzerox > (left_fit[0] * (nonzeroy ** 2) + left_fit[1] * nonzeroy + left_fit[2] - margin)) & (
+            nonzerox < (left_fit[0] * (nonzeroy ** 2) + left_fit[1] * nonzeroy + left_fit[2] + margin)
+        )
+        right_lane_inds = (
+            nonzerox > (right_fit[0] * (nonzeroy ** 2) + right_fit[1] * nonzeroy + right_fit[2] - margin)
+        ) & (nonzerox < (right_fit[0] * (nonzeroy ** 2) + right_fit[1] * nonzeroy + right_fit[2] + margin))
+
+        leftx = nonzerox[left_lane_inds]
+        lefty = nonzeroy[left_lane_inds]
+        rightx = nonzerox[right_lane_inds]
+        righty = nonzeroy[right_lane_inds]
+
+        ploty = np.linspace(0, binary_warped.shape[0] - 1, binary_warped.shape[0])
+        left_fit = self.__FitPolynomial__(leftx, lefty, ploty, xm_per_pix, ym_per_pix)
+        right_fit = self.__FitPolynomial__(rightx, righty, ploty, xm_per_pix, ym_per_pix)
+        return left_fit, right_fit
+
     def CalculateCurvature(self, polynomial_fit, y, ym_per_pix=(30 / 720)):
         numerator = (1 + (2 * polynomial_fit[0] * y * ym_per_pix + polynomial_fit[1]) ** 2) ** (3 / 2)
         denominator = abs(2 * polynomial_fit[0])
         return numerator / denominator
+
+    def CalculateOffsetFromCenter(self, left_fit, right_fit, xm_per_pix=(3.7 / 900)):
+        left_x = left_fit.polynomial_[0] * 720 ** 2 + left_fit.polynomial_[1] * 720 + left_fit.polynomial_[2]
+        right_x = right_fit.polynomial_[0] * 720 ** 2 + right_fit.polynomial_[1] * 720 + right_fit.polynomial_[2]
+        offset = (left_x + right_x) / 2 - 640
+        return offset * xm_per_pix
