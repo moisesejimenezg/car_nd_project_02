@@ -153,8 +153,15 @@ class Pipeline:
         result = self.PlotLaneOnImage(self.img_, left_fit, right_fit)
 
         y_eval = img.shape[0]
-        self.curvatures_["left"].append(self.CalculateCurvature(left_fit.rw_polynomial_, y_eval))
-        self.curvatures_["right"].append(self.CalculateCurvature(right_fit.rw_polynomial_, y_eval))
-        self.offsets_.append(self.CalculateOffsetFromCenter(left_fit, right_fit))
+        left_c = self.CalculateCurvature(left_fit.rw_polynomial_, y_eval)
+        right_c = self.CalculateCurvature(right_fit.rw_polynomial_, y_eval)
+        offset = self.CalculateOffsetFromCenter(left_fit, right_fit)
+        self.curvatures_["left"].append(left_c)
+        self.curvatures_["right"].append(right_c)
+        self.offsets_.append(offset)
+
+        cv2.putText(result, 'Curvature radius (L): ' + str(left_c) + 'm', (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+        cv2.putText(result, 'Curvature radius (R): ' + str(right_c) + 'm', (0, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+        cv2.putText(result, 'Offset from centerline: ' + str(offset) + 'm', (0, 130), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
 
         return result

@@ -221,6 +221,12 @@ then substracting from it the center of the image. This is then converted back t
         return numerator / denominator
 ```
 
+<p align="center">
+    <img src="./images/oneshot.png">
+</p>
+
+Note: bazel run //advanced_lane_finder:test_oneshot_pipeline
+
 #### Full image pipeline
 
 The Pipeline class uses all the classes described in the previous section to process a single image (or a frame in a

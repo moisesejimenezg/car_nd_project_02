@@ -1,19 +1,17 @@
 import cv2
 import matplotlib.pyplot as plt
 
-from geometry import Point
-from geometry import Transformation
-from geometry import Trapezoid
-from pipeline import Pipeline
+from advanced_lane_finder.core.geometry import Point
+from advanced_lane_finder.core.geometry import Transformation
+from advanced_lane_finder.core.geometry import Trapezoid
+from advanced_lane_finder.core.pipeline import Pipeline
 
 pipeline = Pipeline(9, 6, 15)
-pipeline.Calibrate("../camera_cal/calibration*.jpg")
-img = plt.imread("../test_images/test3.jpg")
+pipeline.Prepare()
 
-result, left_curvature, right_curvature = pipeline.Process(img)
+img = plt.imread("./advanced_lane_finder/data/test_images/test3.jpg")
 
-print("Left curvature: " + str(left_curvature))
-print("Right curvature: " + str(right_curvature))
+result = pipeline.Process(img)
 
 plt.imshow(result)
 plt.show()

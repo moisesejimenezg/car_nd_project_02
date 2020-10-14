@@ -97,6 +97,17 @@ py_binary(
 )
 
 py_binary(
+    name = "test_oneshot_pipeline",
+    srcs = ["prototypes/test_oneshot_pipeline.py"],
+    deps = [
+        ":advanced_lane_finder",
+    ],
+    data = [
+        ":data",
+    ],
+)
+
+py_binary(
     name = "test_video_pipeline",
     srcs = ["prototypes/test_video_pipeline.py"],
     deps = [
